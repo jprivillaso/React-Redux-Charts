@@ -5,7 +5,7 @@ import { bindActionCreators } from 'redux';
 
 import Highcharts from 'highcharts';
 
-class StoresChart extends Component {
+class Stores extends Component {
 
   constructor(props) {
     super(props);
@@ -87,7 +87,7 @@ class StoresChart extends Component {
 
     // Set container which the chart should render to.
     this.chart = new Highcharts[this.props.type || "Chart"](
-        this.props.container, 
+        'chart-container', 
         this.getOptions()
     );
 
@@ -99,7 +99,7 @@ class StoresChart extends Component {
 
   render() {
     return (
-      <div id={this.props.container}></div>
+      <div id='chart-container'></div>
     );
   }
 
@@ -115,4 +115,4 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(StoresChart);
+export default connect(mapStateToProps, mapDispatchToProps)(Stores);
