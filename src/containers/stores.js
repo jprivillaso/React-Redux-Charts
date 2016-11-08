@@ -34,7 +34,7 @@ class Stores extends Component {
 
   }
 
-  getOptions() {
+  getStoresData() {
 
     return {
         chart: {
@@ -76,6 +76,73 @@ class Stores extends Component {
 
   }
 
+  getCategoriesAndData(features) {
+
+    let uniqueCategories = new Set();
+    let data = new Map();
+    
+    let result = new Array();
+    let categories = new Array();
+
+    features.map((featureItem) => {
+      
+      var category = 'Store ' + featureItem['Store'];
+      uniqueCategories.add(category);
+      
+      if (!data[category]) data[category] = [];
+      data[category].push(featureItem['Fuel_Price']);
+
+    });
+
+    let categoryValues = uniqueCategories.values();
+
+    for (let store in data) {
+
+      let currentSum = data[store].reduce((prev, next) => {
+        return prev + next;
+      });
+
+      categories.push(categoryValues.next().value);
+      result.push(currentSum / data[store].length);
+
+    }
+
+    return {
+      categories: categories,
+      data: result
+    };
+
+  }
+
+  getSalesData() {
+
+    let data = this.getCategoriesAndData(this.props.features);
+
+    return {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Sales Average By Store'
+        },
+        xAxis: {
+            categories: data.categories
+        },
+        tooltip: {
+          pointFormat: 'Value: <b>{point.y:,.2f}</b>',
+          shared: true
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+          name: 'Average Data',
+          data: data.data
+        }]
+    };
+
+  }
+
   componentDidMount() {
 
     // Extend Highcharts with modules
@@ -86,20 +153,29 @@ class Stores extends Component {
     }
 
     // Set container which the chart should render to.
-    this.chart = new Highcharts[this.props.type || "Chart"](
-        'chart-container', 
-        this.getOptions()
+    this.storesChart = new Highcharts[this.props.type || "Chart"](
+        'storesChart-container', 
+        this.getStoresData()
+    );
+
+    this.salesChart = new Highcharts[this.props.type || "Chart"](
+        'salesChart-container', 
+        this.getSalesData()
     );
 
   }
   
   componentWillUnmount() {
-    this.chart.destroy();
+    this.storesChart.destroy();
+    this.salesChart.destroy();
   }
 
   render() {
     return (
-      <div id='chart-container'></div>
+      <div>
+        <div id='storesChart-container'></div>
+        <div id='salesChart-container'></div>
+      </div>
     );
   }
 
@@ -111,7 +187,8 @@ function mapDispatchToProps(dispatch) {
 
 function mapStateToProps(state) {
   return {
-    stores: state.stores
+    stores: state.stores,
+    features: state.features
   }
 }
 
